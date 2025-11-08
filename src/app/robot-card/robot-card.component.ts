@@ -1,7 +1,9 @@
-import { Component, Input, ViewChild } from '@angular/core';
-import { Robot } from '../services/robot.service';
-import { TranslatePipe } from '@ngx-translate/core';
+// src/app/robot-card/robot-card.component.ts
+import { AfterViewInit, Component, ElementRef, Input, ViewChild, effect, inject, Injector } from '@angular/core';  // ← ADD Injector
+import { runInInjectionContext } from '@angular/core';  // ← ADD this import
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { Robot, RobotService } from '../services/robot.service';
 
 @Component({
   selector: 'app-robot-card',
@@ -37,19 +39,33 @@ import { CommonModule } from '@angular/common';
     canvas { width: 100%; height: 180px; background: #0f172a; border-radius: 12px; margin: 1rem 0; }
     .joints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 1rem 0; }
     .joint { text-align: center; background: #334155; padding: 0.5rem; border-radius: 8px; }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
   `]
 })
-export class RobotCardComponent {
+export class RobotCardComponent implements AfterViewInit {
   @Input() robot!: Robot;
-  jointArray = ['j1','j2','j3','j4','j5','j6'] as const;
+  jointArray = ['j1', 'j2', 'j3', 'j4', 'j5', 'j6'] as const;
 
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
 
-  ngAfterViewInit() {
+  private robotService = inject(RobotService);
+  private injector = inject(Injector);  // ← ADD this for runInInjectionContext
+
+  ngAfterViewInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d')!;
     this.drawArm();
-    this.robotService.robots.subscribe(() => this.drawArm());
+
+    runInInjectionContext(this.injector, () => {  // ← WRAP effect() here
+      effect(() => {
+        this.robotService.robots();
+        this.drawArm();
+      });
+    });
   }
 
   private drawArm() {
@@ -57,7 +73,6 @@ export class RobotCardComponent {
     const { j1, j2, j3, j4, j5, j6 } = this.robot.joints;
     ctx.clearRect(0, 0, 300, 200);
 
-    // Simple 2D arm visualization (they LOVE this)
     const centerX = 150, centerY = 160;
     let x = centerX, y = centerY;
     const lengths = [40, 35, 30, 25, 20, 15];

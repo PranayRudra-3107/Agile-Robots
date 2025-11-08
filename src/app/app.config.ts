@@ -13,7 +13,7 @@ export const appConfig: ApplicationConfig = {
       lang: 'en',                // Default to English
       fallbackLang: 'en',        // Fallback if translation missing
       loader: provideTranslateHttpLoader({
-        prefix: './assets/i18n/',  // Your folder
+        prefix: '/assets/i18n/',  // Your folder
         suffix: '.json'            // Your file extension
       })
     })
