@@ -1,0 +1,11 @@
+{
+  "TITLE": "AGILE ROBOTS Flottenmanager",
+  "EMERGENCY_STOP": "NOT-AUS",
+  "STATUS": {
+    "idle": "Bereit",
+    "running": "In Betrieb",
+    "error": "Fehler",
+    "estopped": "NOT-AUS"
+  },
+  "HEARTBEAT": "Letzter Puls"
+}

@@ -1,0 +1,12 @@
+<app-header
+  [isGerman]="isGerman()"
+  (toggleLang)="toggleLanguage()"
+  (emergencyStop)="emergencyStopAll()">
+</app-header>
+
+<main class="grid">
+  <app-robot-card
+    *ngFor="let robot of robots()"
+    [robot]="robot">
+  </app-robot-card>
+</main>
