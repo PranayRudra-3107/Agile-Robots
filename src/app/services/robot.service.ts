@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal , PLATFORM_ID , inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface Joints { j1: number; j2: number; j3: number; j4: number; j5: number; j6: number; }
 export interface Robot {
@@ -11,6 +12,7 @@ export interface Robot {
 
 @Injectable({ providedIn: 'root' })
 export class RobotService {
+  private platformId = inject(PLATFORM_ID);
   robots = signal<Robot[]>([
     { id: 'D7-001', name: 'Diana 7 #1', status: 'running', joints: this.rand(), heartbeat: Date.now() },
     { id: 'D7-002', name: 'Diana 7 #2', status: 'idle',    joints: this.rand(), heartbeat: Date.now() },
@@ -21,10 +23,13 @@ export class RobotService {
   ]);
 
   private estop = false;
+  private intervalId: any;
 
   startSimulation() {
+    if (!isPlatformBrowser(this.platformId)) return;
     setInterval(() => {
       if (this.estop) return;
+      console.log('Updating', this.robots.length);
       this.robots.update(robots => robots.map(r => ({
         ...r,
         joints: this.rand(),
@@ -36,9 +41,11 @@ export class RobotService {
 
   emergencyStop() {
     this.estop = true;
-    const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-1077.mp3');
-    audio.play();
-    document.body.classList.add('estop-flash');
+if (isPlatformBrowser(this.platformId)) {  // GUARD audio/DOM
+      const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-1077.mp3');
+      audio.play();
+      document.body.classList.add('estop-flash');
+    }
     this.robots.update(robots => robots.map(r => ({ ...r, status: 'estopped' })));
     setTimeout(() => {
       document.body.classList.remove('estop-flash');
@@ -55,5 +62,9 @@ export class RobotService {
       j5: Math.random() * 240 - 120,
       j6: Math.random() * 360 - 180,
     };
+  }
+
+  stopSimulation() {
+    if (this.intervalId) clearInterval(this.intervalId);
   }
 }

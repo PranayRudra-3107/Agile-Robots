@@ -6,7 +6,7 @@
 
 <main class="grid">
   <app-robot-card
-    *ngFor="let robot of robots()"
+    *ngFor="let robot of robots(); trackBy: trackByRobotId"
     [robot]="robot">
   </app-robot-card>
 </main>

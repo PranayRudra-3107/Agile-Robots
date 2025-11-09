@@ -1,5 +1,13 @@
 // src/app/app.component.ts
-import { Component, signal, inject, OnInit, PLATFORM_ID,HostListener } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  OnInit,
+  PLATFORM_ID,
+  HostListener,
+  OnDestroy,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common'; // ← ADD THIS
 import { RobotCardComponent } from './robot-card/robot-card.component';
 import { HeaderComponent } from './header/header.component';
@@ -46,31 +54,46 @@ export class AppComponent implements OnInit {
   }
 
   trackByRobotId(index: number, robot: any): string {
-  return robot.id;  // Uses unique ID like 'D7-001'—all 6 stay & update dynamically
-}
+    return robot.id; // Uses unique ID like 'D7-001'—all 6 stay & update dynamically
+  }
 
   emergencyStopAll() {
     this.robotService.emergencyStop();
   }
 
-  private konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
-private konamiIndex = 0;
+  private konamiCode = [
+    'ArrowUp',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowLeft',
+    'ArrowRight',
+    'KeyB',
+    'KeyA',
+  ];
+  private konamiIndex = 0;
 
-@HostListener('document:keydown', ['$event'])
-handleKeydown(event: KeyboardEvent) {
-  if (event.key === this.konamiCode[this.konamiIndex]) {
-    this.konamiIndex++;
-    if (this.konamiIndex === this.konamiCode.length) {
-      console.log('Konami activated—robots dance!');
-      this.robotService.robots.update(robots => robots.map(r => ({ ...r, status: 'running' })));  // Or custom dance animation
-      const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-victory-1064.mp3');
-      audio.play();
+  @HostListener('document:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent) {
+    if (event.key === this.konamiCode[this.konamiIndex]) {
+      this.konamiIndex++;
+      if (this.konamiIndex === this.konamiCode.length) {
+        console.log('Konami activated—robots dance!');
+        this.robotService.robots.update((robots) =>
+          robots.map((r) => ({ ...r, status: 'running' }))
+        ); // Or custom dance animation
+        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-victory-1064.mp3');
+        audio.play();
+        this.konamiIndex = 0;
+      }
+    } else {
       this.konamiIndex = 0;
     }
-  } else {
-    this.konamiIndex = 0;
   }
 
-
-}
+  ngOnDestroy() {
+    this.robotService.stopSimulation(); // ADD THIS: Clears interval
+  }
 }
