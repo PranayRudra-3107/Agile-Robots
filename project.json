@@ -13,7 +13,6 @@
     "build": {
       "executor": "@angular/build:application",
       "options": {
-        "prerender": false,
         "ssr": {
           "entry": "src/server.ts"
         },

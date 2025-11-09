@@ -14,12 +14,12 @@ export interface Robot {
 export class RobotService {
   private platformId = inject(PLATFORM_ID);
   robots = signal<Robot[]>([
-    { id: 'D7-001', name: 'Diana 7 #1', status: 'running', joints: this.rand(), heartbeat: Date.now() },
-    { id: 'D7-002', name: 'Diana 7 #2', status: 'idle',    joints: this.rand(), heartbeat: Date.now() },
-    { id: 'D7-003', name: 'Diana 7 #3', status: 'running', joints: this.rand(), heartbeat: Date.now() },
-    { id: 'D7-004', name: 'Diana 7 #4', status: 'running', joints: this.rand(), heartbeat: Date.now() },
-    { id: 'D7-005', name: 'Diana 7 #5', status: 'error',   joints: this.rand(), heartbeat: Date.now() },
-    { id: 'D7-006', name: 'Diana 7 #6', status: 'idle',    joints: this.rand(), heartbeat: Date.now() },
+    { id: 'D7-001', name: 'Diana 7', status: 'running', joints: this.rand(), heartbeat: Date.now() },
+    { id: 'D7-002', name: 'Thor', status: 'idle',    joints: this.rand(), heartbeat: Date.now() },
+    { id: 'D7-003', name: 'Yu 5', status: 'running', joints: this.rand(), heartbeat: Date.now() },
+    { id: 'D7-004', name: 'Agile Hand', status: 'running', joints: this.rand(), heartbeat: Date.now() },
+    { id: 'D7-005', name: 'AMR', status: 'error',   joints: this.rand(), heartbeat: Date.now() },
+    { id: 'D7-006', name: 'Agile Core', status: 'idle',    joints: this.rand(), heartbeat: Date.now() },
   ]);
 
   private estop = false;
