@@ -3,6 +3,7 @@ import { runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Robot, RobotService } from '../services/robot.service';
+import * as THREE from 'three';
 
 @Component({
   selector: 'app-robot-card',
@@ -26,6 +27,8 @@ import { Robot, RobotService } from '../services/robot.service';
 
       <canvas #canvas width="300" height="200"></canvas>
 
+      <div #threeContainer style="width: 100%; height: 200px; background: #0f172a; border-radius: 12px; margin: 1rem 0;"></div>
+
       <small class="heartbeat">
         {{ 'HEARTBEAT' | translate }}: {{ robot.heartbeat | date:'HH:mm:ss' }}
       </small>
@@ -47,47 +50,74 @@ import { Robot, RobotService } from '../services/robot.service';
 })
 export class RobotCardComponent implements AfterViewInit {
   @Input() robot!: Robot;
-  jointArray = ['j1', 'j2', 'j3', 'j4', 'j5', 'j6'] as const;
+  jointArray = ['j1','j2','j3','j4','j5','j6'] as const;
 
-  @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
-  private ctx!: CanvasRenderingContext2D;
+  @ViewChild('threeContainer') threeContainer!: ElementRef<HTMLDivElement>;  // CHANGE to div
 
   private robotService = inject(RobotService);
-  private injector = inject(Injector);
-  ngAfterViewInit(): void {
-    this.ctx = this.canvas.nativeElement.getContext('2d')!;
-    this.drawArm();
+  private scene!: THREE.Scene;
+  private camera!: THREE.PerspectiveCamera;
+  private renderer!: THREE.WebGLRenderer;
+  private armGroup!: THREE.Group;
 
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        this.robotService.robots();
-        this.drawArm();
-      });
+  ngAfterViewInit() {
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(75, 300 / 200, 0.1, 1000);
+    this.camera.position.z = 5;
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setSize(300, 200);
+    this.threeContainer.nativeElement.appendChild(this.renderer.domElement);
+
+    this.armGroup = new THREE.Group();
+    this.scene.add(this.armGroup);
+    const lengths = [1, 1, 1, 1, 1, 1];  // Scaled for 3D
+    const angles = [this.robot.joints.j1, this.robot.joints.j2, this.robot.joints.j3, this.robot.joints.j4, this.robot.joints.j5, this.robot.joints.j6];
+    let currentPosition = new THREE.Vector3(0, 0, 0);
+
+    angles.forEach((angle, i) => {
+      const rad = THREE.MathUtils.degToRad(angle);
+      const joint = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, lengths[i], 32), new THREE.MeshPhongMaterial({ color: 0x60a5fa }));
+      joint.position.set(0, lengths[i] / 2, 0);
+      joint.rotation.z = rad;  // Simple rotation for "insane" 3D effect
+      this.armGroup.add(joint);
+      joint.position.add(currentPosition);
+      currentPosition = new THREE.Vector3(0, lengths[i], 0).applyEuler(new THREE.Euler(0, 0, rad));
+    });
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 5, 5);
+    this.scene.add(light);
+    this.scene.add(new THREE.AmbientLight(0x404040));
+
+    this.animate();  // Start animation loop for insane spinning
+
+    effect(() => {
+      this.robotService.robots();
+      this.updateArm();  // Rebuild arm on signal change
     });
   }
 
-  private drawArm() {
-    const ctx = this.ctx;
-    const { j1, j2, j3, j4, j5, j6 } = this.robot.joints;
-    ctx.clearRect(0, 0, 300, 200);
+  private animate() {
+    requestAnimationFrame(() => this.animate());
+    this.armGroup.rotation.y += 0.01;  // Insane rotation effect
+    this.renderer.render(this.scene, this.camera);
+  }
 
-    const centerX = 150, centerY = 160;
-    let x = centerX, y = centerY;
-    const lengths = [40, 35, 30, 25, 20, 15];
+  private updateArm() {
+    // Rebuild arm group on updates (simple - clear and add new joints)
+    this.armGroup.clear();
+    const lengths = [1, 1, 1, 1, 1, 1];
+    const angles = [this.robot.joints.j1, this.robot.joints.j2, this.robot.joints.j3, this.robot.joints.j4, this.robot.joints.j5, this.robot.joints.j6];
+    let currentPosition = new THREE.Vector3(0, 0, 0);
 
-    ctx.strokeStyle = '#60a5fa';
-    ctx.lineWidth = 12;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-
-    const angles = [j1, j2, j3, j4, j5, j6];
     angles.forEach((angle, i) => {
-      const rad = (angle * Math.PI) / 180;
-      x += lengths[i] * Math.sin(rad);
-      y -= lengths[i] * Math.cos(rad);
-      ctx.lineTo(x, y);
+      const rad = THREE.MathUtils.degToRad(angle);
+      const joint = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, lengths[i], 32), new THREE.MeshPhongMaterial({ color: 0x60a5fa }));
+      joint.position.set(0, lengths[i] / 2, 0);
+      joint.rotation.z = rad;
+      this.armGroup.add(joint);
+      joint.position.add(currentPosition);
+      currentPosition = new THREE.Vector3(0, lengths[i], 0).applyEuler(new THREE.Euler(0, 0, rad));
     });
-    ctx.stroke();
   }
 }
