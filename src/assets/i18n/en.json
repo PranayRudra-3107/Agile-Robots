@@ -7,5 +7,6 @@
     "idle": "Ready",
     "running": "Running"
   },
-  "TITLE": "AGILE ROBOTS Fleet Manager"
+  "TITLE": "AGILE ROBOTS Fleet Manager",
+  "SEARCH": "Search by name or status"
 }

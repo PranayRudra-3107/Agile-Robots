@@ -41,7 +41,7 @@ export class RobotService {
 
   emergencyStop() {
     this.estop = true;
-if (isPlatformBrowser(this.platformId)) {  // GUARD audio/DOM
+if (isPlatformBrowser(this.platformId)) {
       const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-1077.mp3');
       audio.play();
       document.body.classList.add('estop-flash');

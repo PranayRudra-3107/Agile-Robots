@@ -1,4 +1,3 @@
-// src/app/app.component.ts
 import {
   Component,
   signal,
@@ -7,8 +6,9 @@ import {
   PLATFORM_ID,
   HostListener,
   OnDestroy,
+  computed
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common'; // ← ADD THIS
+import { isPlatformBrowser } from '@angular/common';
 import { RobotCardComponent } from './robot-card/robot-card.component';
 import { HeaderComponent } from './header/header.component';
 import { RobotService } from './services/robot.service';
@@ -25,24 +25,29 @@ import { CommonModule } from '@angular/common';
 export class AppComponent implements OnInit {
   private robotService: RobotService = inject(RobotService);
   private translate: TranslateService = inject(TranslateService);
-  private platformId = inject(PLATFORM_ID); // ← ADD THIS
+  private platformId = inject(PLATFORM_ID);
 
   robots = this.robotService.robots;
   isGerman = signal(false);
+  searchTerm = signal('');
+
+  filteredRobots = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    return this.robots().filter(robot =>
+      robot.name.toLowerCase().includes(term) || robot.status.toLowerCase().includes(term)
+    );
+  });
 
   ngOnInit() {
-    // In ngOnInit or constructor
     this.translate.use('en').subscribe({
       next: () => console.log('Translations loaded'),
       error: (err) => {
         console.error('Translation error:', err);
         this.translate.setTranslation('en', {
-          /* Paste static en.json content here as fallback */
         });
       },
     });
     if (isPlatformBrowser(this.platformId)) {
-      // ← GUARD: Browser only
       this.robotService.startSimulation();
     }
   }
@@ -54,11 +59,15 @@ export class AppComponent implements OnInit {
   }
 
   trackByRobotId(index: number, robot: any): string {
-    return robot.id; // Uses unique ID like 'D7-001'—all 6 stay & update dynamically
+    return robot.id;
   }
 
   emergencyStopAll() {
     this.robotService.emergencyStop();
+  }
+
+  updateSearch(term: string) {
+    this.searchTerm.set(term);
   }
 
   private konamiCode = [
@@ -83,7 +92,7 @@ export class AppComponent implements OnInit {
         console.log('Konami activated—robots dance!');
         this.robotService.robots.update((robots) =>
           robots.map((r) => ({ ...r, status: 'running' }))
-        ); // Or custom dance animation
+        );
         const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-victory-1064.mp3');
         audio.play();
         this.konamiIndex = 0;
@@ -94,6 +103,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.robotService.stopSimulation(); // ADD THIS: Clears interval
+    this.robotService.stopSimulation();
   }
 }

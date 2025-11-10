@@ -7,5 +7,6 @@
     "idle": "Bereit",
     "running": "In Betrieb"
   },
-  "TITLE": "AGILE ROBOTS Flottenmanager"
+  "TITLE": "AGILE ROBOTS Flottenmanager",
+  "SEARCH": "Suche nach Name oder Status"
 }

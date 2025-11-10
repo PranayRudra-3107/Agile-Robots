@@ -1,6 +1,5 @@
-// src/app/robot-card/robot-card.component.ts
-import { AfterViewInit, Component, ElementRef, Input, ViewChild, effect, inject, Injector } from '@angular/core';  // ← ADD Injector
-import { runInInjectionContext } from '@angular/core';  // ← ADD this import
+import { AfterViewInit, Component, ElementRef, Input, ViewChild, effect, inject, Injector } from '@angular/core';
+import { runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Robot, RobotService } from '../services/robot.service';
@@ -54,13 +53,12 @@ export class RobotCardComponent implements AfterViewInit {
   private ctx!: CanvasRenderingContext2D;
 
   private robotService = inject(RobotService);
-  private injector = inject(Injector);  // ← ADD this for runInInjectionContext
-
+  private injector = inject(Injector);
   ngAfterViewInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d')!;
     this.drawArm();
 
-    runInInjectionContext(this.injector, () => {  // ← WRAP effect() here
+    runInInjectionContext(this.injector, () => {
       effect(() => {
         this.robotService.robots();
         this.drawArm();
