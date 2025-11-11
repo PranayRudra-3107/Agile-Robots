@@ -32,17 +32,133 @@ import { Robot, RobotService } from '../services/robot.service';
     </div>
   `,
   styles: [`
-    .card { background: #1e293b; border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    .estopped { border: 3px solid #dc2626; animation: pulse 1s infinite; }
-    .error { border: 2px solid #f59e0b; }
-    canvas { width: 100%; height: 180px; background: #0f172a; border-radius: 12px; margin: 1rem 0; }
-    .joints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 1rem 0; }
-    .joint { text-align: center; background: #334155; padding: 0.5rem; border-radius: 8px; }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
+    .card {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 1.75rem;  // Increased padding for better spacing
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);  // Softer, deeper shadow for depth
+  transition: transform 0.3s ease, box-shadow 0.3s ease;  // Smooth hover effect
+  max-width: 400px;  // Limit width for better layout in grid
+  margin: 0 auto;  // Center in parent if needed
+}
+
+.card:hover {
+  transform: translateY(-5px);  // Lift on hover for interactivity
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+.estopped {
+  border: 3px solid #dc2626;
+  animation: pulse 1s infinite;
+}
+
+.error {
+  border: 2px solid #f59e0b;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;  // Better spacing below header
+}
+
+h3 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.status {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.status.idle { background: #475569; color: #e2e8f0; }
+.status.running { background: #22c55e; color: #052e16; }
+.status.error { background: #f59e0b; color: #431407; }
+.status.estopped { background: #dc2626; color: #450a0a; }
+
+.joints {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;  // Increased gap for breathing room
+  margin: 1.25rem 0;  // Better vertical spacing
+}
+
+.joint {
+  text-align: center;
+  background: #334155;
+  padding: 0.75rem;  // More padding for touch targets
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: background 0.3s ease;
+}
+
+.joint:hover {
+  background: #475569;  // Subtle hover for interactivity
+}
+
+small { display: block; color: #94a3b8; font-size: 0.8rem; }
+strong { color: #e2e8f0; }
+
+canvas {
+  width: 100%;
+  height: 200px;  // Slightly taller for better viz
+  background: #0f172a;
+  border-radius: 12px;
+  margin: 1.25rem 0;  // Better spacing
+  border: 1px solid #334155;  // Subtle frame
+}
+
+.heartbeat {
+  display: block;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {  // Tablet/Mobile
+  .card {
+    padding: 1.25rem;  // Reduce padding for smaller screens
+    max-width: 100%;  // Full width
+  }
+
+  .joints {
+    grid-template-columns: repeat(2, 1fr);  // 2 columns for better fit
+    gap: 0.5rem;
+  }
+
+  canvas {
+    height: 160px;  // Shorter for mobile
+  }
+
+  h3 { font-size: 1.2rem; }
+  .joint { padding: 0.6rem; font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {  // Small mobile
+  .joints {
+    grid-template-columns: 1fr;  // 1 column stack
+  }
+
+  .header {
+    flex-direction: column;  // Stack name/status
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
   `]
 })
 export class RobotCardComponent implements AfterViewInit {
